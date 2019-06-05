@@ -40,13 +40,11 @@ class Object:
 
 
 class Shelf(Object):
-    def __init__(self, obj_id, x_pos=13, y_pos=200, status=StatusesRack.CAN_BE_MOVED, length=25, width=300):
+    def __init__(self, obj_id, x_pos=13, y_pos=200, status=StatusesRack.CAN_BE_MOVED, length=25, width=25):
         Object.__init__(self, obj_id, x_pos, y_pos, length, width)
         self.status = status
 
         self.products = []
-        for i in range(0, 7):
-            self.products.append(Product((self.x_pos, self.y_pos - self.width / 2 + 50*i)))
 
         self.shelf = Polygon([(self.x_pos - self.length / 2, self.y_pos - self.width / 2),
                               (self.x_pos - self.length / 2, self.y_pos + self.width / 2),
@@ -56,8 +54,6 @@ class Shelf(Object):
     def draw(self, screen):
         x, y = self.shelf.exterior.xy
         pygame.draw.polygon(screen, constants.get('shelf_color'), [(xx, yy) for xx, yy in zip(x, y)])
-        for pr in self.products:
-            pr.draw(screen)
 
 
 class UnloadPoint:

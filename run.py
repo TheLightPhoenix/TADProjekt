@@ -7,7 +7,13 @@ pos = constants.get('robot_base')
 
 if __name__ == '__main__':
     rob = [Robot(1, pos[0], pos[1]), Robot(2, pos[0], pos[1]), Robot(3, pos[0], pos[1])]
-    env = [Shelf(1, 20, 200), Shelf(2, 120, 200), Shelf(3, 220, 200), Shelf(4, 320, 200), Shelf(5, 420, 200), Shelf(6, 520, 200)]
+    #env = [Shelf(1, 20, 200), Shelf(2, 120, 200), Shelf(3, 220, 200), Shelf(4, 320, 200), Shelf(5, 420, 200), Shelf(6, 520, 200)]
+    env = []
+    for i in range(0,5):
+        for j in range(0,8):
+            env.append(Shelf((i*8+j), 50*i, 50*j))
+
+
     charging_points = [ChargingPoint(1, 700, 30), ChargingPoint(2, 700, 120), ChargingPoint(4, 700, 220), ChargingPoint(5, 700, 320)]
     unload_points = [UnloadPoint(40, 550), UnloadPoint(140, 550), UnloadPoint(240, 550), UnloadPoint(340, 550), UnloadPoint(440, 550)]
     pygame.init()
