@@ -11,25 +11,25 @@ class Object:
         self.width = width
         self.object_id = obj_id
 
-    def move_right(self):
+    def move_down(self):
         if check_if_position_is_valid(self.x_pos, self.y_pos + 1):
             self.y_pos = self.y_pos + 1
         else:
             print('Size of the map is to small. Object cannot be moved')
 
-    def move_left(self):
+    def move_up(self):
         if check_if_position_is_valid(self.x_pos, self.y_pos - 1):
             self.y_pos = self.y_pos - 1
         else:
             print('Size of the map is to small. Object cannot be moved')
 
-    def move_forward(self):
+    def move_right(self):
         if check_if_position_is_valid(self.x_pos + 1, self.y_pos):
             self.x_pos = self.x_pos + 1
         else:
             print('Size of the map is to small. Object cannot be moved')
 
-    def move_back(self):
+    def move_left(self):
         if check_if_position_is_valid(self.x_pos - 1, self.y_pos):
             self.x_pos = self.x_pos - 1
         else:

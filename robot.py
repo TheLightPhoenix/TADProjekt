@@ -12,6 +12,8 @@ class Robot(Object):
         self.status = status
         self.power_left = power
         self.shelf_held = shelf
+        self.destination = [x_pos, y_pos]
+        self.in_move = False
 
     def draw(self, screen):
         pygame.draw.circle(screen, constants.get('robot_color'), [int(self.x_pos), int(self.y_pos)], self.radius)
@@ -24,16 +26,38 @@ class Robot(Object):
         Object.move_left(self)
         self.shelf_held.move_left()
 
-    def move_back(self):
-        Object.move_back(self)
-        self.shelf_held.move_back()
+    def move_up(self):
+        Object.move_up(self)
+        self.shelf_held.move_up()
 
-    def move_forward(self):
-        Object.move_forward(self)
-        self.shelf_held.move_forward()
+    def move_down(self):
+        Object.move_down(self)
+        self.shelf_held.move_down()
+
+    def set_destination(self, x, y):
+        self.destination = [x,y]
+
+    def update(self):
+        if self.y_pos < self.destination[1]:
+            self.move_down()
+            self.in_move = True
+        elif self.y_pos > self.destination[1]:
+            self.move_up()
+            self.in_move = True
+        elif self.x_pos < self.destination[0]:
+            self.move_right()
+            self.in_move = True
+        elif self.x_pos > self.destination[0]:
+            self.move_left()
+            self.in_move = True
+        else:
+            self.in_move = False
+
 
     def get_position(self):
         return [self.x_pos, self.y_pos]
 
+    def get_shelf(self, shelf):
+        self.shelf_held = shelf
 
 

@@ -6,11 +6,10 @@ import pygame
 pos = constants.get('robot_base')
 
 if __name__ == '__main__':
-    rob = [Robot(1, pos[0], pos[1]), Robot(2, pos[0], pos[1]), Robot(3, pos[0], pos[1])]
-    #env = [Shelf(1, 20, 200), Shelf(2, 120, 200), Shelf(3, 220, 200), Shelf(4, 320, 200), Shelf(5, 420, 200), Shelf(6, 520, 200)]
+    rob = [Robot(1, pos[0], pos[1]), Robot(2, pos[0], pos[1]+50), Robot(3, pos[0], pos[1]+100)]
     env = []
-    for i in range(0,5):
-        for j in range(0,8):
+    for i in range(1,5):
+        for j in range(1,8):
             env.append(Shelf((i*8+j), 50*i, 50*j))
 
 
@@ -27,6 +26,9 @@ if __name__ == '__main__':
     dir = [v, 0]
     dir1 = [v, 0]
     dir2 = [0, v]
+    rob[0].set_destination(200, 50)
+    rob[1].set_destination(200, 100)
+    rob[2].set_destination(200, 150)
     while not exit:
 
         for event in pygame.event.get():
@@ -35,6 +37,7 @@ if __name__ == '__main__':
 
         screen.fill(constants.get('screen_color'))
         for x in rob:
+            x.update()
             x.draw(screen)
         for x in env:
             x.draw(screen)
@@ -42,10 +45,10 @@ if __name__ == '__main__':
             x.draw(screen)
         for x in unload_points:
             x.draw(screen)
-        rob[0].move_forward()
-        rob[1].move_back()
-        rob[2].move_left()
-
+        if not rob[0].in_move:
+            rob[0].get_shelf(env[4])
+            rob[0].set_destination(300,50)
+        env[0].move_down()
         pygame.display.flip()
 
     pygame.quit()
