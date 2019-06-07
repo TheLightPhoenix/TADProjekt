@@ -4,6 +4,9 @@ from constants import *
 
 
 class Object:
+
+    DEBUG = False
+
     def __init__(self, obj_id, x_pos=0, y_pos=0, length=10, width=10):
         self.x_pos = x_pos
         self.y_pos = y_pos
@@ -14,25 +17,25 @@ class Object:
     def move_down(self):
         if check_if_position_is_valid(self.x_pos, self.y_pos + 1):
             self.y_pos = self.y_pos + 1
-        else:
+        elif Object.DEBUG:
             print('Size of the map is to small. Object cannot be moved')
 
     def move_up(self):
         if check_if_position_is_valid(self.x_pos, self.y_pos - 1):
             self.y_pos = self.y_pos - 1
-        else:
+        elif Object.DEBUG:
             print('Size of the map is to small. Object cannot be moved')
 
     def move_right(self):
         if check_if_position_is_valid(self.x_pos + 1, self.y_pos):
             self.x_pos = self.x_pos + 1
-        else:
+        elif Object.DEBUG:
             print('Size of the map is to small. Object cannot be moved')
 
     def move_left(self):
         if check_if_position_is_valid(self.x_pos - 1, self.y_pos):
             self.x_pos = self.x_pos - 1
-        else:
+        elif Object.DEBUG:
             print('Size of the map is to small. Object cannot be moved')
 
     def draw(self, screen):
@@ -50,6 +53,9 @@ class Shelf(Object):
                               (self.x_pos - self.length / 2, self.y_pos + self.width / 2),
                               (self.x_pos + self.length / 2, self.y_pos + self.width / 2),
                               (self.x_pos + self.length / 2, self.y_pos - self.width / 2)])
+
+    def get_position(self):
+        return [self.x_pos, self.y_pos]
 
     def draw(self, screen):
         x, y = self.shelf.exterior.xy

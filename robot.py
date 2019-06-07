@@ -13,6 +13,7 @@ class Robot(Object):
         self.power_left = power
         self.shelf_held = shelf
         self.destination = [x_pos, y_pos]
+        self.path = []
         self.in_move = False
 
     def draw(self, screen):
@@ -51,8 +52,11 @@ class Robot(Object):
             self.move_left()
             self.in_move = True
         else:
-            self.in_move = False
-
+            if not self.path:
+                self.in_move = False
+            else:
+                self.destination = self.path[0]
+                self.path.pop(0)
 
     def get_position(self):
         return [self.x_pos, self.y_pos]
