@@ -3,7 +3,7 @@ import numpy as np
 
 width = 800
 height = 600
-robot_size = 40
+robot_size = 50
 m_width = int(width/robot_size)
 m_height = int(height/robot_size)
 
