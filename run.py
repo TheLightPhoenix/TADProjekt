@@ -21,13 +21,7 @@ if __name__ == '__main__':
     window_height = 600
     screen = pygame.display.set_mode((window_width, window_height))
 
-    v = 0.5
     exit = False
-    dir = [v, 0]
-    dir1 = [v, 0]
-    dir2 = [0, v]
-    rob[1].set_destination(200, 100)
-    rob[2].set_destination(200, 150)
     points1 = [[400, 500], [200, 50], [300, 50], [100, 450], [40, 550]]
     points2 = [[400, 500], [200, 100], [300, 50], [100, 450], [140, 550]]
     points3 = [[400, 500], [200, 150], [300, 50], [200, 450], [240, 550]]
@@ -38,6 +32,9 @@ if __name__ == '__main__':
     rob[1].set_destination(points2[i_points2][0], points2[i_points2][1])
     rob[2].set_destination(points3[i_points3][0], points3[i_points3][1])
     while not exit:
+        iterations_counter = iterations_counter + 1
+        if iterations_counter == 1000000:
+            iterations_counter = 0
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -78,6 +75,13 @@ if __name__ == '__main__':
             if i_points3 == 2:
                 rob[2].get_shelf(env[23])
             rob[2].set_destination(points3[i_points3][0], points3[i_points3][1])
+
+        if iterations_counter % 10 == 0:
+            for r in rob:
+                x_from = r.get_position()
+                new_path = path_algorithm.find_path(x_from, r.destination, rob, env)
+                if new_path:
+                    r.path = new_path
 
         pygame.display.flip()
 
