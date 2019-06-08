@@ -26,9 +26,17 @@ if __name__ == '__main__':
     dir = [v, 0]
     dir1 = [v, 0]
     dir2 = [0, v]
-    rob[0].set_destination(200, 50)
     rob[1].set_destination(200, 100)
     rob[2].set_destination(200, 150)
+    points1 = [[400, 500], [200, 50], [300, 50], [100, 450], [40, 550]]
+    points2 = [[400, 500], [200, 100], [300, 50], [100, 450], [140, 550]]
+    points3 = [[400, 500], [200, 150], [300, 50], [200, 450], [240, 550]]
+    i_points1 = 0
+    i_points2 = 0
+    i_points3 = 0
+    rob[0].set_destination(points1[i_points1][0], points1[i_points1][1])
+    rob[1].set_destination(points2[i_points2][0], points2[i_points2][1])
+    rob[2].set_destination(points3[i_points3][0], points3[i_points3][1])
     while not exit:
 
         for event in pygame.event.get():
@@ -36,19 +44,41 @@ if __name__ == '__main__':
                 exit = True
 
         screen.fill(constants.get('screen_color'))
-        for x in rob:
-            x.update()
-            x.draw(screen)
-        for x in env:
-            x.draw(screen)
         for x in charging_points:
             x.draw(screen)
         for x in unload_points:
             x.draw(screen)
+        for x in rob:
+            x.update()
+            x.draw(screen)
+        for x in env:
+            x.update()
+            x.draw(screen)
+
         if not rob[0].in_move:
-            rob[0].get_shelf(env[4])
-            rob[0].set_destination(300,50)
-        env[0].move_down()
+            i_points1 += 1
+            if i_points1 > 4:
+                i_points1 = 4
+            if i_points1 == 2:
+                rob[0].get_shelf(env[21])
+            rob[0].set_destination(points1[i_points1][0], points1[i_points1][1])
+
+        if not rob[1].in_move:
+            i_points2 += 1
+            if i_points2 > 4:
+                i_points2 = 4
+            if i_points2 == 2:
+                rob[1].get_shelf(env[22])
+            rob[1].set_destination(points2[i_points2][0], points2[i_points2][1])
+
+        if not rob[2].in_move:
+            i_points3 += 1
+            if i_points3 > 4:
+                i_points3 = 4
+            if i_points3 == 2:
+                rob[2].get_shelf(env[23])
+            rob[2].set_destination(points3[i_points3][0], points3[i_points3][1])
+
         pygame.display.flip()
 
     pygame.quit()

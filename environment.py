@@ -54,6 +54,23 @@ class Shelf(Object):
     def draw(self, screen):
         x, y = self.shelf.exterior.xy
         pygame.draw.polygon(screen, constants.get('shelf_color'), [(xx, yy) for xx, yy in zip(x, y)])
+    def move_right(self):
+        Object.move_right(self)
+
+    def move_left(self):
+        Object.move_left(self)
+
+    def move_up(self):
+        Object.move_up(self)
+
+    def move_down(self):
+        Object.move_down(self)
+
+    def update(self):
+        self.shelf = Polygon([(self.x_pos - self.length / 2, self.y_pos - self.width / 2),
+                              (self.x_pos - self.length / 2, self.y_pos + self.width / 2),
+                              (self.x_pos + self.length / 2, self.y_pos + self.width / 2),
+                              (self.x_pos + self.length / 2, self.y_pos - self.width / 2)])
 
 
 class UnloadPoint:
