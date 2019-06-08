@@ -12,6 +12,9 @@ constants['unload_point_color'] = (255, 128, 0)
 constants['screen_color'] = (255, 255, 255)
 constants['robot_base'] = [700, 500]
 constants['robot_radius'] = 15
+constants['battery_low'] = 10
+constants['max_order_size'] = 5
+constants['max_robots'] = 2
 
 
 # Statuses definitions
@@ -19,6 +22,10 @@ class StatusesRobot(Enum):
     FREE = 0
     BUSY = 1
     CHARGING = 2
+    IN_DESTINATION = 3
+    GOING_TO_CHARGING_POINT = 4
+    GOING_TO_UNLOAD_POINT = 5
+    GOING_TO_COLLECT_SHELF = 6
 
 
 class StatusesRack(Enum):
@@ -30,6 +37,10 @@ class StatusesChargingPoint(Enum):
     FREE = 0
     BUSY = 1
 
+
+class StatusesOrder(Enum):
+    NO_FREE_ROBOTS = 0
+    FREE_ROBOT_FOUND = 1
 
 def check_if_position_is_valid(x_pos, y_pos):
     if (x_pos < constants.get('map_width') and x_pos > 0

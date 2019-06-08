@@ -3,7 +3,7 @@ import numpy as np
 
 width = 800
 height = 600
-robot_size = 50
+robot_size = 40
 m_width = int(width/robot_size)
 m_height = int(height/robot_size)
 
@@ -62,7 +62,7 @@ def propagate_path(matrix, xy_from, xy_to):
                     current_iteration_next_points.append(neighbour)
 
         # replace next points
-        next_points.clear()
+        next_points = []
         for n in current_iteration_next_points:
             next_points.append(n)
 

@@ -59,24 +59,8 @@ class Shelf(Object):
 
     def draw(self, screen):
         x, y = self.shelf.exterior.xy
-        pygame.draw.polygon(screen, constants.get('shelf_color'), [(xx, yy) for xx, yy in zip(x, y)])
-    def move_right(self):
-        Object.move_right(self)
-
-    def move_left(self):
-        Object.move_left(self)
-
-    def move_up(self):
-        Object.move_up(self)
-
-    def move_down(self):
-        Object.move_down(self)
-
-    def update(self):
-        self.shelf = Polygon([(self.x_pos - self.length / 2, self.y_pos - self.width / 2),
-                              (self.x_pos - self.length / 2, self.y_pos + self.width / 2),
-                              (self.x_pos + self.length / 2, self.y_pos + self.width / 2),
-                              (self.x_pos + self.length / 2, self.y_pos - self.width / 2)])
+        pygame.draw.polygon(screen, constants.get('shelf_color'), [(xx, yy) for xx, yy in zip([self.x_pos, self.x_pos, self.x_pos+25, self.x_pos+25],
+                                                                                              [self.y_pos, self.y_pos+25, self.y_pos+25, self.y_pos])])
 
 
 class UnloadPoint:
@@ -132,12 +116,28 @@ class ChargingPoint(Object):
 
 
 class Order:
-    def __init__(self, obj_id, size):
+    def __init__(self, obj_id, size, robot, shelves_with_products, unload_point):
         self.obj_id = obj_id
         self.nb_of_items = size
+        self.robot_used_curr = robot
+        self.shelves_prod = shelves_with_products
+        self.unload_point = unload_point
 
     def remove_order(self):
         del self
+
+    def update(self):
+        if not self.shelves_prod:
+            self.remove_order()
+        elif self.robot_used_curr.status == StatusesRobot.FREE or self.robot_used_curr.status == StatusesRobot.GOING_TO_COLLECT_SHELF:
+            self.robot_used_curr.set_destination(self.shelves_prod[0].get_position())
+        elif self.robot_used_curr.status == StatusesRobot.GOING_TO_CHARGING_POINT:
+            pass
+        elif self.robot_used_curr.status == StatusesRobot.GOING_TO_UNLOAD_POINT:
+            self.robot_used_curr.set_destination(self.unload_point)
+            # bufor na statusy, zarzadzanie zmianami statusu
+
+
 
 
 class Product:
