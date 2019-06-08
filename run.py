@@ -1,5 +1,6 @@
 from robot import Robot
 from environment import *
+import path_algorithm
 import pygame
 
 
@@ -31,6 +32,9 @@ if __name__ == '__main__':
     rob[0].set_destination(points1[i_points1][0], points1[i_points1][1])
     rob[1].set_destination(points2[i_points2][0], points2[i_points2][1])
     rob[2].set_destination(points3[i_points3][0], points3[i_points3][1])
+    iterations_counter = 0
+
+    algorithm = True
     while not exit:
         iterations_counter = iterations_counter + 1
         if iterations_counter == 1000000:
@@ -52,36 +56,37 @@ if __name__ == '__main__':
             x.update()
             x.draw(screen)
 
-        if not rob[0].in_move:
-            i_points1 += 1
-            if i_points1 > 4:
-                i_points1 = 4
-            if i_points1 == 2:
-                rob[0].get_shelf(env[21])
-            rob[0].set_destination(points1[i_points1][0], points1[i_points1][1])
+        if algorithm:
+            if iterations_counter % 10 == 0:
+                for r in rob:
+                    x_from = r.get_position()
+                    new_path = path_algorithm.find_path(x_from, points1[2], rob, env)
+                    if new_path:
+                        r.path = new_path
+        else:
+            if not rob[0].in_move:
+                i_points1 += 1
+                if i_points1 > 4:
+                    i_points1 = 4
+                if i_points1 == 2:
+                    rob[0].get_shelf(env[21])
+                rob[0].set_destination(points1[i_points1][0], points1[i_points1][1])
 
-        if not rob[1].in_move:
-            i_points2 += 1
-            if i_points2 > 4:
-                i_points2 = 4
-            if i_points2 == 2:
-                rob[1].get_shelf(env[22])
-            rob[1].set_destination(points2[i_points2][0], points2[i_points2][1])
+            if not rob[1].in_move:
+                i_points2 += 1
+                if i_points2 > 4:
+                    i_points2 = 4
+                if i_points2 == 2:
+                    rob[1].get_shelf(env[22])
+                rob[1].set_destination(points2[i_points2][0], points2[i_points2][1])
 
-        if not rob[2].in_move:
-            i_points3 += 1
-            if i_points3 > 4:
-                i_points3 = 4
-            if i_points3 == 2:
-                rob[2].get_shelf(env[23])
-            rob[2].set_destination(points3[i_points3][0], points3[i_points3][1])
-
-        if iterations_counter % 10 == 0:
-            for r in rob:
-                x_from = r.get_position()
-                new_path = path_algorithm.find_path(x_from, r.destination, rob, env)
-                if new_path:
-                    r.path = new_path
+            if not rob[2].in_move:
+                i_points3 += 1
+                if i_points3 > 4:
+                    i_points3 = 4
+                if i_points3 == 2:
+                    rob[2].get_shelf(env[23])
+                rob[2].set_destination(points3[i_points3][0], points3[i_points3][1])
 
         pygame.display.flip()
 
