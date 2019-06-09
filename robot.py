@@ -44,8 +44,21 @@ class Robot(Object):
     def set_destination(self, x, y):
         self.destination = [x, y]
 
+    def set_status(self, new_status):
+        if new_status == self.status:
+            pass
+        else:
+            self.earlier_status = self.status
+            self.status = new_status
+
+    def update_status(self):
+        if self.get_position() == self.destination:
+            self.set_status(StatusesRobot.IN_DESTINATION)
+        elif self.status == StatusesRobot.IN_DESTINATION and self.earlier_status == StatusesRobot.FREE:
+            self.set_status(StatusesRobot.FREE)
+
     def update(self, charging_points):
-        self.update_power(charging_points)
+
         if self.y_pos < self.destination[1]:
             self.move_down()
             self.in_move = True
@@ -58,18 +71,15 @@ class Robot(Object):
         elif self.x_pos > self.destination[0]:
             self.move_left()
             self.in_move = True
-        elif self.get_position() == self.destination:
-            self.status = StatusesRobot.IN_DESTINATION
-        if self.status == StatusesRobot.IN_DESTINATION:
-            self.destination = self.path[0]
-            self.path.pop(0)
-            self.status = StatusesRobot.BUSY
-        '''else:
+        else:
             if not self.path:
                 self.in_move = False
             else:
                 self.destination = self.path[0]
-                self.path.pop(0)'''
+                self.path.pop(0)
+
+        self.update_status()
+        self.update_power(charging_points)
 
     def get_position(self):
         return [self.x_pos, self.y_pos]
@@ -81,7 +91,7 @@ class Robot(Object):
             print('Shelf cannot be moved')
 
     def update_power(self, charging_points):
-        self.power_left = self.power_left-1
+        self.power_left = self.power_left # here we need to sub sth
         if self.power_left < constants.get('battery_low'):
             print('Battery of robot %d low', self.object_id)
             if self.status == StatusesRobot.FREE:
@@ -91,9 +101,21 @@ class Robot(Object):
         for point in charging_points:
             if point.status == StatusesChargingPoint.FREE:
                 self.set_destination(point.x_pos, point.y_pos)
-                self.status = StatusesRobot.CHARGING
+                self.set_status(StatusesRobot.GOING_TO_CHARGING_POINT)
             else:
                 pass
 
-    def go_unload(self, unloading_point):
+    def go_unload(self, unloading_point, new_path):
         self.set_destination(unloading_point.x_pos, unloading_point.y_pos)
+        self.path = new_path
+        self.set_status(StatusesRobot.GOING_TO_UNLOAD_POINT)
+
+    def go_to_take_shelf(self, new_path, shelf_pos):
+        self.set_destination(shelf_pos[0], shelf_pos[1])
+        self.path = new_path
+        self.set_status(StatusesRobot.GOING_TO_COLLECT_SHELF)
+
+    def put_shelf_back(self):
+        # Set status, find place for shelf, put it back
+        self.set_status(StatusesRobot.PUTTING_SHELF_BACK)
+

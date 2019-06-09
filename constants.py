@@ -4,7 +4,7 @@ from enum import Enum
 constants = dict()
 constants['map_width'] = 800
 constants['map_length'] = 600
-constants['max_power'] = 100
+constants['max_power'] = 1000000000000000
 constants['robot_color'] = (255, 165, 0)
 constants['shelf_color'] = (255, 0, 255)
 constants['charging_point_color'] = (0, 128, 0)
@@ -26,6 +26,7 @@ class StatusesRobot(Enum):
     GOING_TO_CHARGING_POINT = 4
     GOING_TO_UNLOAD_POINT = 5
     GOING_TO_COLLECT_SHELF = 6
+    PUTTING_SHELF_BACK = 7
 
 
 class StatusesRack(Enum):

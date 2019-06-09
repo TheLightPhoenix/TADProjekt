@@ -1,14 +1,14 @@
 import numpy as np
+from constants import *
 
-
-width = 800
-height = 600
-robot_size = 40
+width = constants.get('map_width')
+height = constants.get('map_length')
+robot_size = constants.get('robot_radius')*2
 m_width = int(width/robot_size)
 m_height = int(height/robot_size)
 
 
-def find_path(xy_from, xy_to, robots, shelfs):
+def find_path(xy_from, xy_to, robots, shelves):
 
     # translate points to unit-size matrix
     x_from, y_from = xy_from
@@ -22,7 +22,7 @@ def find_path(xy_from, xy_to, robots, shelfs):
 
     print("Finding path from: " + str(xy_from) + " to: " + str(xy_to))
     matrix = np.zeros((m_width, m_height))
-    matrix = place_obstacles(matrix, robots, shelfs)
+    matrix = place_obstacles(matrix, robots, shelves)
 
     path = propagate_path(matrix, xy_from, xy_to)
 
@@ -45,7 +45,7 @@ def propagate_path(matrix, xy_from, xy_to):
     x, y = xy_from
     x_to, y_to = xy_to
     next_points = [(int(x), int(y))]
-    matrix[x, y] = 1
+    matrix[x-1, y-1] = 1
     for iteration in range(1, 100):
         current_iteration_next_points = []
         # mark neighbours as next points
@@ -169,15 +169,15 @@ def clear_matrix(matrix, path):
         matrix[x, y] = i+1
 
 
-def place_obstacles(matrix, robots, shelfs):
+def place_obstacles(matrix, robots, shelves):
     for robot in robots:
         robot_x, robot_y = robot.get_position()
         x = int(robot_x/robot_size)
         y = int(robot_y/robot_size)
-        matrix[x, y] = -1
-    for shelf in shelfs:
+        matrix[x-1, y-1] = -1
+    for shelf in shelves:
         shelf_x, shelf_y = shelf.get_position()
         x = int(shelf_x/robot_size)
         y = int(shelf_y/robot_size)
-        matrix[x, y] = -1
+        matrix[x-1, y-1] = -1
     return matrix

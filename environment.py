@@ -1,6 +1,7 @@
 from shapely.geometry.polygon import Polygon
 import pygame
 from constants import *
+import path_algorithm
 
 
 class Object:
@@ -58,9 +59,9 @@ class Shelf(Object):
         return [self.x_pos, self.y_pos]
 
     def draw(self, screen):
-        x, y = self.shelf.exterior.xy
-        pygame.draw.polygon(screen, constants.get('shelf_color'), [(xx, yy) for xx, yy in zip([self.x_pos, self.x_pos, self.x_pos+25, self.x_pos+25],
-                                                                                              [self.y_pos, self.y_pos+25, self.y_pos+25, self.y_pos])])
+        pygame.draw.polygon(screen, constants.get('shelf_color'),
+                            [(xx, yy) for xx, yy in zip([self.x_pos, self.x_pos, self.x_pos+25, self.x_pos+25],
+                                                        [self.y_pos, self.y_pos+25, self.y_pos+25, self.y_pos])])
 
 
 class UnloadPoint:
@@ -78,6 +79,9 @@ class UnloadPoint:
     def draw(self, screen):
         x, y = self.item.exterior.xy
         pygame.draw.polygon(screen, constants.get('unload_point_color'), [(xx, yy) for xx, yy in zip(x, y)])
+
+    def get_position(self):
+        return [self.x_pos, self.y_pos]
 
 
 class ChargingPoint(Object):
@@ -111,7 +115,7 @@ class ChargingPoint(Object):
         pass
 
     def charge(self, robot):
-        robot.status = StatusesRobot.CHARGING
+        robot.set_status(StatusesRobot.CHARGING)
         robot.power_left = constants.get('max_level')  # max level
 
 
@@ -124,35 +128,44 @@ class Order:
         self.unload_point = unload_point
 
     def remove_order(self):
+        self.robot_used_curr.set_status(StatusesRobot.FREE)
         del self
 
-    def update(self):
-        if not self.shelves_prod:
+    def update(self, shelves, robots):
+        # If robot came to destination and was going to unload point take items for order and put shelf back for now with bo putting back
+        if (self.robot_used_curr.status == StatusesRobot.IN_DESTINATION and
+                self.robot_used_curr.earlier_status == StatusesRobot.GOING_TO_UNLOAD_POINT):
+            self.shelves_prod.pop(0)
+            # All shelves taken delete order if not take the next one
+            if not self.shelves_prod:
+                self.remove_order()
+            else:
+                act_pos = self.robot_used_curr.get_position()
+                shelf_pos = self.shelves_prod[0].get_position()
+                path = path_algorithm.find_path(act_pos, shelf_pos, robots, shelves)
+                self.robot_used_curr.go_to_take_shelf(path, shelf_pos)
+
+        # If robot is in destination and was going to collect shelf, navigate robot to unload point
+        elif (self.robot_used_curr.status == StatusesRobot.IN_DESTINATION and
+                self.robot_used_curr.earlier_status == StatusesRobot.GOING_TO_COLLECT_SHELF):
+            self.robot_used_curr.shelf_held = self.shelves_prod[0]
+            act_pos = self.robot_used_curr.get_position()
+            path = path_algorithm.find_path(act_pos, self.unload_point.get_position(), robots, shelves)
+            self.robot_used_curr.go_unload(self.unload_point.get_position(), path)
+
+        # If robot is in starting point make it to bring the first shelf
+        elif (self.robot_used_curr.status == StatusesRobot.IN_DESTINATION and
+              self.robot_used_curr.earlier_status == StatusesRobot.BUSY) or\
+             (self.robot_used_curr.status == StatusesRobot.BUSY and
+              self.robot_used_curr.earlier_status == StatusesRobot.FREE):
+            act_pos = self.robot_used_curr.get_position()
+            shelf_pos = self.shelves_prod[0].get_position()
+            path = path_algorithm.find_path(act_pos, shelf_pos, robots, shelves)
+            self.robot_used_curr.go_to_take_shelf(path, shelf_pos)
+
+        elif not self.shelves_prod:
             self.remove_order()
-        elif self.robot_used_curr.status == StatusesRobot.FREE or self.robot_used_curr.status == StatusesRobot.GOING_TO_COLLECT_SHELF:
-            self.robot_used_curr.set_destination(self.shelves_prod[0].get_position())
-        elif self.robot_used_curr.status == StatusesRobot.GOING_TO_CHARGING_POINT:
-            pass
-        elif self.robot_used_curr.status == StatusesRobot.GOING_TO_UNLOAD_POINT:
-            self.robot_used_curr.set_destination(self.unload_point)
-            # bufor na statusy, zarzadzanie zmianami statusu
+        else:
+            print ('No action')
 
 
-
-
-class Product:
-    def __init__(self, init_position=(13, 200), length=25, width=25):
-        pos_x = init_position[0]
-        pos_y = init_position[1]
-
-        self.length = length
-        self.width = width
-
-        self.item = Polygon([(pos_x - self.length / 2, pos_y - self.width / 2),
-                              (pos_x - self.length / 2, pos_y + self.width / 2),
-                              (pos_x + self.length / 2, pos_y + self.width / 2),
-                              (pos_x + self.length / 2, pos_y - self.width / 2)])
-
-    def draw(self, screen):
-        x, y = self.item.exterior.xy
-        pygame.draw.polygon(screen, (255, 255, 0), [(xx, yy) for xx, yy in zip(x, y)])
