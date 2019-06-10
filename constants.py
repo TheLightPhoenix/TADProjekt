@@ -27,6 +27,7 @@ class StatusesRobot(Enum):
     GOING_TO_UNLOAD_POINT = 5
     GOING_TO_COLLECT_SHELF = 6
     PUTTING_SHELF_BACK = 7
+    DONE = 8
 
 
 class StatusesRack(Enum):

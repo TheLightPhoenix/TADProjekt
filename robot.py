@@ -58,7 +58,11 @@ class Robot(Object):
             self.set_status(StatusesRobot.FREE)
 
     def update(self, charging_points):
-
+        if self.status == StatusesRobot.PUTTING_SHELF_BACK and self.shelf_held is None:
+            self.status = StatusesRobot.DONE
+        if self.destination == (0,0):
+            self.destination = constants.get('robot_base')
+            self.status = StatusesRobot.FREE
         if self.y_pos < self.destination[1]:
             self.move_down()
             self.in_move = True
@@ -87,6 +91,7 @@ class Robot(Object):
     def get_shelf(self, shelf):
         if shelf.status != StatusesRack.CANNOT_BE_MOVED:
             self.shelf_held = shelf
+            self.shelf_held.status = StatusesRack.CANNOT_BE_MOVED
         else:
             print('Shelf cannot be moved')
 
@@ -105,17 +110,29 @@ class Robot(Object):
             else:
                 pass
 
-    def go_unload(self, unloading_point, new_path):
-        self.set_destination(unloading_point.x_pos, unloading_point.y_pos)
+    def go_unload(self, unloading_point_pos, new_path):
+        self.shelf_held.update_previous_location(self.destination)
+        print('UNLOAD')
+        print(unloading_point_pos)
+        self.set_destination(unloading_point_pos[0], unloading_point_pos[1])
         self.path = new_path
         self.set_status(StatusesRobot.GOING_TO_UNLOAD_POINT)
 
     def go_to_take_shelf(self, new_path, shelf_pos):
+        print('SHELF')
+        print(shelf_pos)
         self.set_destination(shelf_pos[0], shelf_pos[1])
         self.path = new_path
         self.set_status(StatusesRobot.GOING_TO_COLLECT_SHELF)
 
-    def put_shelf_back(self):
+    def put_shelf_back(self, new_path, shelf):
         # Set status, find place for shelf, put it back
-        self.set_status(StatusesRobot.PUTTING_SHELF_BACK)
 
+        self.set_status(StatusesRobot.PUTTING_SHELF_BACK)
+        self.set_destination(shelf.prev_location[0], shelf.prev_location[1])
+        self.path = new_path
+
+    def go_home(self, path):
+        self.set_status(StatusesRobot.DONE)
+        self.set_destination(700, 500)
+        self.path = path

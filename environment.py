@@ -8,7 +8,7 @@ class Object:
 
     DEBUG = False
 
-    def __init__(self, obj_id, x_pos=0, y_pos=0, length=10, width=10):
+    def __init__(self, obj_id, x_pos, y_pos, length=10, width=10):
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.length = length
@@ -47,7 +47,8 @@ class Shelf(Object):
     def __init__(self, obj_id, x_pos=13, y_pos=200, status=StatusesRack.CAN_BE_MOVED, length=25, width=25):
         Object.__init__(self, obj_id, x_pos, y_pos, length, width)
         self.status = status
-
+        self.prev_location = [x_pos, y_pos]
+        self.base_pos = [x_pos, y_pos]
         self.products = []
 
         self.shelf = Polygon([(self.x_pos - self.length / 2, self.y_pos - self.width / 2),
@@ -62,6 +63,13 @@ class Shelf(Object):
         pygame.draw.polygon(screen, constants.get('shelf_color'),
                             [(xx, yy) for xx, yy in zip([self.x_pos, self.x_pos, self.x_pos+25, self.x_pos+25],
                                                         [self.y_pos, self.y_pos+25, self.y_pos+25, self.y_pos])])
+
+    def update_previous_location(self, loc):
+        self.prev_location = loc
+
+    def update(self):
+        if self.base_pos == self.get_position():
+            self.status = StatusesRack.CAN_BE_MOVED
 
 
 class UnloadPoint:
@@ -137,35 +145,72 @@ class Order:
                 self.robot_used_curr.earlier_status == StatusesRobot.GOING_TO_UNLOAD_POINT):
             self.shelves_prod.pop(0)
             # All shelves taken delete order if not take the next one
-            if not self.shelves_prod:
-                self.remove_order()
-            else:
-                act_pos = self.robot_used_curr.get_position()
-                shelf_pos = self.shelves_prod[0].get_position()
-                path = path_algorithm.find_path(act_pos, shelf_pos, robots, shelves)
-                self.robot_used_curr.go_to_take_shelf(path, shelf_pos)
+            act_pos = self.robot_used_curr.get_position()
+            path = path_algorithm.find_path(act_pos, self.robot_used_curr.shelf_held.prev_location, robots, shelves)
+            self.robot_used_curr.put_shelf_back(path, self.robot_used_curr.shelf_held)
+
+        elif (self.robot_used_curr.status == StatusesRobot.IN_DESTINATION and
+              self.robot_used_curr.earlier_status == StatusesRobot.PUTTING_SHELF_BACK):
+                if self.robot_used_curr.shelf_held is not None:
+                    self.robot_used_curr.shelf_held.status = StatusesRack.CAN_BE_MOVED
+                self.robot_used_curr.shelf_held = None
+                if not self.shelves_prod:
+
+                    self.robot_used_curr.set_destination(constants.get('robot_base')[0], constants.get('robot_base')[1])
+                    self.remove_order()
+
+                else:
+
+                    act_pos = self.robot_used_curr.get_position()
+                    if self.shelves_prod[0].status != StatusesRack.CANNOT_BE_MOVED:
+                        shelf_pos = self.shelves_prod[0].get_position()
+                        path = path_algorithm.find_path(act_pos, shelf_pos, robots, shelves)
+                        self.robot_used_curr.go_to_take_shelf(path, shelf_pos)
+                    elif len(self.shelves_prod) > 1:
+                        for i in range(len(self.shelves_prod)):
+                            if self.shelves_prod[i] and self.shelves_prod[i].status == StatusesRack.CAN_BE_MOVED:
+                                tmp = self.shelves_prod[0]
+                                self.shelves_prod[0] = self.shelves_prod[i]
+                                self.shelves_prod[i] = tmp
+                                shelf_pos = self.shelves_prod[0].get_position()
+                                path = path_algorithm.find_path(act_pos, shelf_pos, robots, shelves)
+                                self.robot_used_curr.go_to_take_shelf(path, shelf_pos)
 
         # If robot is in destination and was going to collect shelf, navigate robot to unload point
         elif (self.robot_used_curr.status == StatusesRobot.IN_DESTINATION and
                 self.robot_used_curr.earlier_status == StatusesRobot.GOING_TO_COLLECT_SHELF):
-            self.robot_used_curr.shelf_held = self.shelves_prod[0]
-            act_pos = self.robot_used_curr.get_position()
-            path = path_algorithm.find_path(act_pos, self.unload_point.get_position(), robots, shelves)
-            self.robot_used_curr.go_unload(self.unload_point.get_position(), path)
+
+            self.robot_used_curr.get_shelf(self.shelves_prod[0])
+            if self.robot_used_curr.shelf_held is not None:
+                act_pos = self.robot_used_curr.get_position()
+                path = path_algorithm.find_path(act_pos, self.unload_point.get_position(), robots, shelves)
+                self.robot_used_curr.go_unload(self.unload_point.get_position(), path)
 
         # If robot is in starting point make it to bring the first shelf
         elif (self.robot_used_curr.status == StatusesRobot.IN_DESTINATION and
               self.robot_used_curr.earlier_status == StatusesRobot.BUSY) or\
              (self.robot_used_curr.status == StatusesRobot.BUSY and
               self.robot_used_curr.earlier_status == StatusesRobot.FREE):
+
             act_pos = self.robot_used_curr.get_position()
-            shelf_pos = self.shelves_prod[0].get_position()
-            path = path_algorithm.find_path(act_pos, shelf_pos, robots, shelves)
-            self.robot_used_curr.go_to_take_shelf(path, shelf_pos)
+            if self.shelves_prod:
+                if self.shelves_prod[0].status != StatusesRack.CANNOT_BE_MOVED:
+                    shelf_pos = self.shelves_prod[0].get_position()
+                    print (shelf_pos)
+                    path = path_algorithm.find_path(act_pos, shelf_pos, robots, shelves)
+                    self.robot_used_curr.go_to_take_shelf(path, shelf_pos)
+                elif len(self.shelves_prod) > 1:
+                    for i in range(len(self.shelves_prod)):
+                        if self.shelves_prod[i] and self.shelves_prod[i].status == StatusesRack.CAN_BE_MOVED:
+                            tmp = self.shelves_prod[0]
+                            self.shelves_prod[0] = self.shelves_prod[i]
+                            self.shelves_prod[i] = tmp
+                            shelf_pos = self.shelves_prod[0].get_position()
+                            path = path_algorithm.find_path(act_pos, shelf_pos, robots, shelves)
+                            self.robot_used_curr.go_to_take_shelf(path, shelf_pos)
 
-        elif not self.shelves_prod:
-            self.remove_order()
-        else:
-            print ('No action')
+            else:
 
+                self.remove_order()
+                self.robot_used_curr.set_destination(constants.get('robot_base')[0], constants.get('robot_base')[1])
 

@@ -26,16 +26,22 @@ def find_path(xy_from, xy_to, robots, shelves):
 
     path = propagate_path(matrix, xy_from, xy_to)
 
-    print_matrix(matrix, path)
+    #print_matrix(matrix, path)
 
     if path:
-        path = translate_back_to_real_sizes(path)
+        for i in path:
+            if i is None:
+                i=(x_from, y_from)
+        path = translate_back_to_real_sizes(x_from, y_from, path)
 
     return path
 
 
-def translate_back_to_real_sizes(path):
+def translate_back_to_real_sizes(x_from, y_from, path):
     new_path = []
+    for i in range(len(path)):
+        if path[i] is None:
+            path[i] = (int(x_from/robot_size), int(y_from/robot_size))
     for x, y in path:
         new_path.append((x*robot_size, y*robot_size))
     return new_path
@@ -66,7 +72,7 @@ def propagate_path(matrix, xy_from, xy_to):
         for n in current_iteration_next_points:
             next_points.append(n)
 
-    # print("Path not found!")
+    print("Path not found!")
 
 
 def rollback_path(matrix, xy_to):
@@ -165,6 +171,8 @@ def clear_matrix(matrix, path):
                 matrix[w, h] = -2
     for i in range(len(path)):
         point = path[i]
+        if point is None:
+            break
         x, y = point
         matrix[x, y] = i+1
 
