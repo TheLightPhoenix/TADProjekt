@@ -104,12 +104,22 @@ class Simulation:
 pos = constants.get('robot_base')
 
 if __name__ == '__main__':
-    rob = [Robot(1, pos[0], pos[1]), Robot(2, pos[0], pos[1]+50), Robot(3, pos[0], pos[1]+100), Robot(4, pos[0], pos[1]-50),
-           Robot(5, pos[0]-50, pos[1])]
+
+    rob = []
+
+    for i in range(0, 3):
+        for j in range(0, 2):
+            rob.append(Robot(i*j, pos[0]+i*32, pos[1]+j*32))
+    # rob = [Robot(1, pos[0], pos[1]), Robot(2, pos[0], pos[1]+50), Robot(3, pos[0], pos[1]+100), Robot(4, pos[0], pos[1]-50),
+    #        Robot(5, pos[0]-50, pos[1])]
     env = []
-    for i in range(1,8):
-        for j in range(1,8):
-            env.append(Shelf((i*8+j), 60*i, 60*j))
+    max_i = 3;
+    max_j = 5;
+    for nb_groups_rows in range (0, 3):
+        for nb_groups_cols in range(0, 7):
+            for i in range(1, max_i):
+                for j in range(1, max_j):
+                    env.append(Shelf((i*8+j), 30*i+nb_groups_cols*max_i*30, 30*j+nb_groups_rows*max_j*30))
 
     charging_points = [ChargingPoint(1, 700, 30), ChargingPoint(2, 700, 120), ChargingPoint(3, 700, 220), ChargingPoint(4, 700, 320)]
     unload_points = [UnloadPoint(40, 550), UnloadPoint(140, 550), UnloadPoint(240, 550), UnloadPoint(340, 550), UnloadPoint(440, 550)]
