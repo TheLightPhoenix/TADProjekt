@@ -102,13 +102,13 @@ class Robot(Object):
             if self.status == StatusesRobot.FREE:
                 self.go_charging(charging_points)
 
-    def go_charging(self, charging_points):
-        for point in charging_points:
-            if point.status == StatusesChargingPoint.FREE:
-                self.set_destination(point.x_pos, point.y_pos)
-                self.set_status(StatusesRobot.GOING_TO_CHARGING_POINT)
-            else:
-                pass
+    def go_charging(self, charging_point):
+        # for point in charging_points:
+        if charging_point.status == StatusesChargingPoint.FREE:
+            self.set_destination(charging_point.x_pos, charging_point.y_pos)
+            self.set_status(StatusesRobot.GOING_TO_CHARGING_POINT)
+        else:
+            pass
 
     def go_unload(self, unloading_point_pos, new_path):
         self.shelf_held.update_previous_location(self.destination)

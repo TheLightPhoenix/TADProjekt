@@ -214,3 +214,24 @@ class Order:
                 self.remove_order()
                 self.robot_used_curr.set_destination(constants.get('robot_base')[0], constants.get('robot_base')[1])
 
+
+
+def charging_management(uncharged_robots, charging_points, minut):
+
+    if(minut%6 == 0):
+        i = 0;
+        for j, unchar_r in enumerate(uncharged_robots):
+            if i < len(charging_points):
+                if unchar_r.status == StatusesRobot.FREE:
+                    unchar_r.go_charging(charging_points[i])
+                    i = i+1
+                    uncharged_robots_tmp = uncharged_robots[:j]
+                    if j+1 < len(uncharged_robots):
+                        uncharged_robots_tmp.extend(uncharged_robots[j+1:])
+                    else:
+                        pass
+                    uncharged_robots = uncharged_robots_tmp
+                else:
+                    pass
+            else:
+                pass
