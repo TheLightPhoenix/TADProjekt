@@ -218,20 +218,37 @@ class Order:
 
 def charging_management(uncharged_robots, charging_points, minut):
 
-    if(minut%6 == 0):
-        i = 0;
-        for j, unchar_r in enumerate(uncharged_robots):
-            if i < len(charging_points):
-                if unchar_r.status == StatusesRobot.FREE:
-                    unchar_r.go_charging(charging_points[i])
-                    i = i+1
-                    uncharged_robots_tmp = uncharged_robots[:j]
-                    if j+1 < len(uncharged_robots):
-                        uncharged_robots_tmp.extend(uncharged_robots[j+1:])
-                    else:
-                        pass
-                    uncharged_robots = uncharged_robots_tmp
-                else:
-                    pass
-            else:
-                pass
+    curr_to_load = len(charging_points)* int(minut/6)
+    for i, ch_point in enumerate(charging_points):
+        if curr_to_load + i < len(uncharged_robots):
+            curr_rob = uncharged_robots[curr_to_load + i]
+            if curr_rob.shelf_held is  None:
+                curr_rob.set_status(StatusesRobot.CHARGING)
+                curr_rob.set_destination(ch_point.x_pos, ch_point.y_pos)
+                ch_point.status = StatusesChargingPoint.BUSY
+        elif curr_to_load + i >= len(charging_points):
+            uncharged_robots[curr_to_load -len(charging_points) + i].set_status(StatusesRobot.FREE)
+            ch_point.status = StatusesChargingPoint.FREE
+
+
+
+    # if minut % 6 == 0:
+    #     i = 0
+    #     for j, unchar_r in enumerate(uncharged_robots):
+    #         if i < len(charging_points):
+    #             if unchar_r.status == StatusesRobot.FREE:
+    #                 unchar_r.go_charging(charging_points[i])
+    #                 i = i+1
+    #                 uncharged_robots_tmp = uncharged_robots[:j]
+    #                 if j+1 < len(uncharged_robots):
+    #                     uncharged_robots_tmp.extend(uncharged_robots[j+1:])
+    #                 else:
+    #                     pass
+    #                 uncharged_robots = uncharged_robots_tmp
+    #             else:
+    #                 pass
+    #         else:
+    #             pass
+    #
+    # else:
+    #     for r in uncharged_robots

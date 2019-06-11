@@ -1,5 +1,4 @@
 from robot import *
-from constants import *
 from environment import *
 from path_algorithm import *
 from math import ceil
@@ -120,14 +119,14 @@ if __name__ == '__main__':
 
     rob = []
 
-    for i in range(0, 5):
-        for j in range(0, 5):
+    for i in range(0, 3):
+        for j in range(0, 2):
             rob.append(Robot(i*j, pos[0]+i*32, pos[1]+j*32))
 
 
     env = []
-    max_i = 3;
-    max_j = 5;
+    max_i = 3
+    max_j = 5
     for nb_groups_rows in range (0, 3):
         for nb_groups_cols in range(0, 12):
             for i in range(1, max_i):
@@ -146,6 +145,8 @@ if __name__ == '__main__':
         unload_points.append(UnloadPoint(i*60, window_height - 50))
     # unload_points = [UnloadPoint(40, 550), UnloadPoint(140, 550), UnloadPoint(240, 550), UnloadPoint(340, 550), UnloadPoint(440, 550)]
     orders = create_orders(len(rob)*2, rob, env, unload_points)
+
+    started_num_of_unload_points = len(orders)
     uncharged_robots = rob;
     pygame.init()
     pygame.display.set_caption("Symulacja")
@@ -178,16 +179,22 @@ if __name__ == '__main__':
         simulation.update()
         screen.fill(constants.get('screen_color'))
 
+
+        for x in charging_points:
+            x.draw(screen)
+        for x in unload_points:
+            x.draw(screen)
         for x in rob:
             x.draw(screen)
         for x in env:
             x.draw(screen)
             x.update()
-        for x in charging_points:
-            x.draw(screen)
-        for x in unload_points:
-            x.draw(screen)
 
+        # to change the frequency of loading please change value of divider:
+        # divider = 2 #-> very fast, but sometimes the robot is too far to go to the loading point
+        # divider = 10 # -> Optimal
+        # divider = 60 # Real... You need to waint 5 minut of charging
+        divider = 10
         charging_management(uncharged_robots, charging_points, int(sec_counter/10))
 
 
@@ -196,15 +203,17 @@ if __name__ == '__main__':
             pygame.display.flip()
             pygame.quit()
             for i in rob:
-                path = path_algorithm.find_path(i.get_position(), [700, 500], simulation.robots, simulation.shelves)
-                i.go_home(path)
-
+                if i.status == StatusesRobot.FREE:
+                    path = path_algorithm.find_path(i.get_position(), [700, 500], simulation.robots, simulation.shelves)
+                    i.go_home(path)
+        # rob[0].set_destination(300, 300)
 
         # Print the current iteration:
         text = font.render('Time: {} sec'.format(sec_counter), True, constants['font_color'])
         textRect = text.get_rect()
         textRect.center = (window_width - 100, 28)
         screen.blit(text, textRect)
+
 
         pygame.display.flip()
     pygame.quit()
