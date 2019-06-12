@@ -17,6 +17,7 @@ class Robot(Object):
         self.destination = [x_pos, y_pos]
         self.path = []
         self.in_move = False
+        self.time_of_change_status = 0
 
     def draw(self, screen):
         pygame.draw.circle(screen, constants.get('robot_color'), [int(self.x_pos), int(self.y_pos)], self.radius)
@@ -51,13 +52,14 @@ class Robot(Object):
             self.earlier_status = self.status
             self.status = new_status
 
-    def update_status(self):
+    def update_status(self, sec_counter):
         if self.get_position() == self.destination:
             self.set_status(StatusesRobot.IN_DESTINATION)
+            self.time_of_change_status = sec_counter
         elif self.status == StatusesRobot.IN_DESTINATION and self.earlier_status == StatusesRobot.FREE:
             self.set_status(StatusesRobot.FREE)
 
-    def update(self, charging_points):
+    def update(self, charging_points, sec_counter):
         if self.status == StatusesRobot.PUTTING_SHELF_BACK and self.shelf_held is None:
             self.status = StatusesRobot.DONE
         if self.destination == (0,0):
@@ -82,7 +84,7 @@ class Robot(Object):
                 self.destination = self.path[0]
                 self.path.pop(0)
 
-        self.update_status()
+        self.update_status(sec_counter)
         self.update_power(charging_points)
 
     def get_position(self):
@@ -121,7 +123,7 @@ class Robot(Object):
     def go_to_take_shelf(self, new_path, shelf_pos):
         print('SHELF')
         print(shelf_pos)
-        self.set_destination(shelf_pos[0], shelf_pos[1])
+        self.set_destination(shelf_pos[0] + 13, shelf_pos[1] + 13)
         self.path = new_path
         self.set_status(StatusesRobot.GOING_TO_COLLECT_SHELF)
 

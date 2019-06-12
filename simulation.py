@@ -41,6 +41,7 @@ class Simulation:
         self.unload_points = unload_points
         self.orders = orders
         self.orders_maintained = []
+        # self.time_of_change =0;
 
     def update(self):
         print(len(self.orders_maintained))
@@ -53,6 +54,13 @@ class Simulation:
                         path = path_algorithm.find_path(j.get_position(), i.base_pos, self.robots, self.shelves)
                         j.put_shelf_back(path, i)
         '''
+        # to change the frequency of loading please change value of divider:
+        # divider = 2 #-> very fast, but sometimes the robot is too far to go to the loading point
+        # divider = 10 # -> Optimal
+        # divider = 60 # Real... You need to waint 5 minut of charging
+        divider = 10
+        charging_management(uncharged_robots, charging_points, int(sec_counter / 10))
+
         for i in rob:
             print(i.status)
             if i.status == StatusesRobot.FREE and i.shelf_held is not None:
@@ -60,7 +68,7 @@ class Simulation:
                 i.put_shelf_back(path, i.shelf_held)
         for i in self.robots:
             i.path = path_algorithm.find_path([i.x_pos, i.y_pos], i.destination, self.robots, self.shelves)
-            i.update(self.charging_points)
+            i.update(self.charging_points, sec_counter)
         for i in range(len(self.orders_maintained)):
             self.orders_maintained[i].update(self.shelves, self.robots)
         for i in range(len(self.orders_maintained)):
@@ -91,15 +99,16 @@ class Simulation:
             for i in self.robots:
                 if i.status == StatusesRobot.FREE or i.status == StatusesRobot.DONE or i.status == StatusesRobot.IN_DESTINATION:
                     if i.shelf_held is None:
-                        i.set_destination(700, 500)
+                        i.set_destination(constants['map_width']-100, constants['map_length'] -100)
                         i.set_status(StatusesRobot.DONE)
                         i.path = path_algorithm.find_path(i.get_position(), i.destination, self.robots, self.shelves)
                     else:
                         path = path_algorithm.find_path(i.get_position(), i.shelf_held.base_pos, self.robots, self.shelves)
-                        i.set_status(StatusesRobot.PUTTING_SHELF_BACK)
-                        i.put_shelf_back(path, i.shelf_held)
-                        if i.status == StatusesRobot.PUTTING_SHELF_BACK and i.get_position() == i.shelf_held.base_pos :
-                            i.shelf_held = None
+                        if (sec_counter - i.time_of_change > 5):
+                            i.set_status(StatusesRobot.PUTTING_SHELF_BACK)
+                            i.put_shelf_back(path, i.shelf_held)
+                            if i.status == StatusesRobot.PUTTING_SHELF_BACK and i.get_position() == i.shelf_held.base_pos :
+                                i.shelf_held = None
 
 
     def find_free_robot(self, order):
@@ -128,7 +137,7 @@ if __name__ == '__main__':
     max_i = 3
     max_j = 5
     for nb_groups_rows in range (0, 3):
-        for nb_groups_cols in range(0, 12):
+        for nb_groups_cols in range(0, 8):
             for i in range(1, max_i):
                 for j in range(1, max_j):
                     env.append(Shelf((i*8+j), 30*i+nb_groups_cols*max_i*30, 30*j+nb_groups_rows*max_j*30))
@@ -144,7 +153,7 @@ if __name__ == '__main__':
     for i in range(1, 8):
         unload_points.append(UnloadPoint(i*60, window_height - 50))
     # unload_points = [UnloadPoint(40, 550), UnloadPoint(140, 550), UnloadPoint(240, 550), UnloadPoint(340, 550), UnloadPoint(440, 550)]
-    orders = create_orders(len(rob)*2, rob, env, unload_points)
+    orders = create_orders(100, rob, env, unload_points)
 
     started_num_of_unload_points = len(orders)
     uncharged_robots = rob;
@@ -189,13 +198,13 @@ if __name__ == '__main__':
         for x in env:
             x.draw(screen)
             x.update()
-
-        # to change the frequency of loading please change value of divider:
-        # divider = 2 #-> very fast, but sometimes the robot is too far to go to the loading point
-        # divider = 10 # -> Optimal
-        # divider = 60 # Real... You need to waint 5 minut of charging
-        divider = 10
-        charging_management(uncharged_robots, charging_points, int(sec_counter/10))
+        #
+        # # to change the frequency of loading please change value of divider:
+        # # divider = 2 #-> very fast, but sometimes the robot is too far to go to the loading point
+        # # divider = 10 # -> Optimal
+        # # divider = 60 # Real... You need to waint 5 minut of charging
+        # divider = 10
+        # charging_management(uncharged_robots, charging_points, int(sec_counter/10))
 
 
         if not simulation.orders and not simulation.orders_maintained:
@@ -204,7 +213,7 @@ if __name__ == '__main__':
             pygame.quit()
             for i in rob:
                 if i.status == StatusesRobot.FREE:
-                    path = path_algorithm.find_path(i.get_position(), [700, 500], simulation.robots, simulation.shelves)
+                    path = path_algorithm.find_path(i.get_position(), pos, simulation.robots, simulation.shelves)
                     i.go_home(path)
         # rob[0].set_destination(300, 300)
 
@@ -213,6 +222,13 @@ if __name__ == '__main__':
         textRect = text.get_rect()
         textRect.center = (window_width - 100, 28)
         screen.blit(text, textRect)
+
+        # # Print the current iteration:
+        # text_order = font.render('Orders: {}'.format(len(simulation.orders)), True, constants['font_color'])
+        # textRect_order = text_order.get_rect()
+        # textRect_order.center = (window_width - 100, window_height- 30)
+        # screen.blit(text_order, textRect_order)
+
 
 
         pygame.display.flip()

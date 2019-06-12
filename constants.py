@@ -2,15 +2,15 @@ from enum import Enum
 
 # Constant values definitions
 constants = dict()
-constants['map_width'] = 1200
-constants['map_length'] = 640
+constants['map_width'] = 800
+constants['map_length'] = 600
 constants['max_power'] = 1000000000000000
 constants['robot_color'] = (255, 165, 0)
 constants['shelf_color'] = (255, 0, 255)
 constants['charging_point_color'] = (0, 128, 0)
 constants['unload_point_color'] = (255, 128, 0)
 constants['screen_color'] = (128, 128, 128)
-constants['robot_base'] = [constants['map_width']-200, constants['map_length'] -300]
+constants['robot_base'] = [constants['map_width']-200, constants['map_length'] -100]
 constants['robot_radius'] = 15
 constants['battery_low'] = 10
 constants['max_order_size'] = 5

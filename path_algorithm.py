@@ -26,7 +26,7 @@ def find_path(xy_from, xy_to, robots, shelves):
 
     path = propagate_path(matrix, xy_from, xy_to)
 
-    #print_matrix(matrix, path)
+    # print_matrix(matrix, path)
 
     if path:
         for i in path:
@@ -72,7 +72,7 @@ def propagate_path(matrix, xy_from, xy_to):
         for n in current_iteration_next_points:
             next_points.append(n)
 
-    print("Path not found!")
+    # print("Path not found!")
 
 
 def rollback_path(matrix, xy_to):

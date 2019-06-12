@@ -227,7 +227,7 @@ def charging_management(uncharged_robots, charging_points, minut):
                 curr_rob.set_destination(ch_point.x_pos, ch_point.y_pos)
                 ch_point.status = StatusesChargingPoint.BUSY
         elif curr_to_load + i >= len(charging_points):
-            uncharged_robots[curr_to_load -len(charging_points) + i].set_status(StatusesRobot.FREE)
+            uncharged_robots[curr_to_load - len(charging_points) + i].set_status(StatusesRobot.FREE)
             ch_point.status = StatusesChargingPoint.FREE
 
 
